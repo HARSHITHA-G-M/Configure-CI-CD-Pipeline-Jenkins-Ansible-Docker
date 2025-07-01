@@ -1,28 +1,36 @@
 pipeline {
-    agent any
+  agent any
 
-    stages {
-        stage('Clone Code') {
-            steps {
-                git 'https://github.com/HARSHITHA-G-M/Configure-CI-CD-Pipeline-Jenkins-Ansible-Docker.git'
-            }
-        }
+  environment {
+    IMAGE = "myapp:latest"
+    TARFILE = "myapp.tar"
+  }
 
-        stage('Build Docker Image') {
-            steps {
-                dir('docker') {
-                    sh 'docker build -t myapp .'
-                }
-            }
-        }
-
-        stage('Deploy with Ansible') {
-            steps {
-                dir('ansible') {
-                    sh 'ansible-playbook -i /etc/ansible/hosts deploy.yml'
-                }
-            }
-        }
+  stages {
+    stage('Clone') {
+      steps {
+        git 'https://github.com/HARSHITHA-G-M/CI-CD-Pipeline-using-Jenkins-Ansible-Docker.git'
+      }
     }
+
+    stage('Build Docker Image') {
+      steps {
+        sh 'docker build -t $IMAGE .'
+        sh 'docker save $IMAGE > $TARFILE'
+      }
+    }
+
+    stage('Copy to Remote') {
+      steps {
+        sh 'scp $TARFILE user@172-31-13-161:/home/user/'
+      }
+    }
+
+    stage('Ansible Deploy') {
+      steps {
+        sh 'ansible-playbook -i inventory.ini deploy.yml'
+      }
+    }
+  }
 }
 

@@ -1,0 +1,12 @@
+- name: Deploy App Container
+  hosts: web
+  tasks:
+    - name: Stop existing container
+      shell: docker stop myapp || true && docker rm myapp || true
+
+    - name: Load new image
+      shell: docker load < /home/user/myapp.tar
+
+    - name: Run container
+      shell: docker run -d --name myapp -p 80:3000 myapp:latest
+
